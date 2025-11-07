@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/balancestracker/static/js/main.ef3c85d6.js",
+    "index.html": "/balancestracker/index.html",
+    "main.ef3c85d6.js.map": "/balancestracker/static/js/main.ef3c85d6.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.ef3c85d6.js"
+  ]
+}
