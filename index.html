@@ -1,89 +1,1635 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Dashboard (Supabase)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- 1. REMOVE all Firebase scripts -->
+  <!-- 2. ADD the Supabase-js script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div id="root"></div>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.5.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.5.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.5.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+    const { createClient } = supabase;
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+    // --- ⬇️ ⬇️ CONFIGURE YOUR SUPABASE HERE ⬇️ ⬇️ ---
+    const SUPABASE_URL = "https://jjhrfrehslrkghnirhlf.supabase.co"; // From Step 1
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqaHJmcmVoc2xya2dobmlyaGxmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4MDc0MTYsImV4cCI6MjA3ODM4MzQxNn0.LeDl2PT8Q3FG9i8UtoaVesm4EvjRrvldIA-WsRktOIQ"; // From Step 1
+    // --- ⬆️ ⬆️ END SUPABASE CONFIG ⬆️ ⬆️ ---
+    
+    // --- ⬇️ ⬇️ DEFINE YOUR EDITOR EMAILS HERE ⬇️ ⬇️ ---
+    const EDITOR_EMAILS = [
+      "cody@oregontaxi.com",
+      "haildir12121@gmail.com"
+    ];
+    // --- ⬆️ ⬆️ END EDITOR EMAILS ⬆️ ⬆️ ---
+
+    // 3. Initialize the Supabase client
+    let supabaseClient;
+    try {
+      if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "YOUR_SUPABASE_URL") {
+        supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } else {
+        console.error("Supabase URL and Key are not configured.");
       }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    } catch (e) {
+      console.error("Error initializing Supabase:", e);
+    }
+    
+    // Lucide Icons Components
+    const Upload = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>;
+    const FileCheck = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>;
+    const Loader2 = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>;
+    const Users = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+    const SlidersHorizontal = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="21" y1="4" x2="14" y2="4"></line><line x1="10" y1="4" x2="3" y2="4"></line><line x1="21" y1="12" x2="12" y2="12"></line><line x1="8" y1="12" x2="3" y2="12"></line><line x1="21" y1="20" x2="16" y2="20"></line><line x1="12" y1="20" x2="3" y2="20"></line><line x1="14" y1="2" x2="14" y2="6"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="16" y1="18" x2="16" y2="22"></line></svg>;
+    const AlertCircle = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+    const TrendingUp = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>;
+    const TrendingDown = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>;
+    const Info = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+    const X = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+    const DatabaseZap = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 15 21.84"></path><path d="M21 5V8"></path><path d="M21 12L18 17H22L19 22"></path><path d="M3 12A9 3 0 0 0 14.59 14.87"></path></svg>;
+    const Plus = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+    const Pencil = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
+    const Trash2 = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
+    const Calendar = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+    const LogOut = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
+    
+    
+    function AppContainer() {
+      const [supabase, setSupabase] = useState(null); // Will hold the client
+      const [user, setUser] = useState(null);
+      const [isAuthReady, setIsAuthReady] = useState(false);
+      const [isEditor, setIsEditor] = useState(false);
+      
+      const [email, setEmail] = useState("");
+      const [password, setPassword] = useState("");
+      const [authError, setAuthError] = useState(null);
+      const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+      useEffect(() => {
+        if (!supabaseClient) {
+           setAuthError("Supabase is not configured. Please add URL and Key.");
+           setIsAuthReady(true);
+           return;
+        }
+        
+        setSupabase(supabaseClient);
+
+        // Check for an existing session
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            setUser(session.user);
+            setIsEditor(EDITOR_EMAILS.includes(session.user.email));
+          }
+          setIsAuthReady(true);
+        });
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
+          (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+              setUser(session.user);
+              setIsEditor(EDITOR_EMAILS.includes(session.user.email));
+            } else if (event === 'SIGNED_OUT') {
+              setUser(null);
+              setIsEditor(false);
+            }
+          }
+        );
+        
+        return () => subscription.unsubscribe();
+      }, []);
+      
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        if (!supabase) return;
+        setIsLoggingIn(true);
+        setAuthError(null);
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (error) {
+          console.error("Error logging in:", error);
+          if (error.message === "Invalid login credentials") {
+             setAuthError("Invalid email or password.");
+          } else {
+             setAuthError(error.message);
+          }
+        }
+        // onAuthStateChanged will handle setting the user
+        setIsLoggingIn(false);
+      };
+      
+      const handleLogout = async () => {
+        if (supabase) {
+          await supabase.auth.signOut();
+        }
+      };
+
+      if (!isAuthReady || !supabase) {
+        return (
+          <div className="flex items-center justify-center min-h-screen">
+            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+            {authError && <p className="text-red-500 ml-4">{authError}</p>}
+          </div>
+        );
+      }
+      
+      if (!user) {
+        return (
+          <LoginScreen
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            handleLogin={handleLogin}
+            authError={authError}
+            isLoggingIn={isLoggingIn}
+          />
+        );
+      }
+      
+      return (
+        <App 
+          supabase={supabase}
+          user={user}
+          isEditor={isEditor}
+          handleLogout={handleLogout}
+        />
+      );
+    }
+    
+    function LoginScreen({ email, setEmail, password, setPassword, handleLogin, authError, isLoggingIn }) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <div className="w-full max-w-md p-8 m-4 bg-white rounded-xl shadow-2xl">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+              Client Dashboard Login
+            </h2>
+            {authError && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+                <p>{authError}</p>
+              </div>
+            )}
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  disabled={isLoggingIn}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-200"
+                >
+                  {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : "Login"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+
+    function App({ supabase, user, isEditor, handleLogout }) {
+      const [isSeeded, setIsSeeded] = useState(false);
+      const [isSeeding, setIsSeeding] = useState(false);
+      const [filesSeeded, setFilesSeeded] = useState([]);
+      const [seedError, setSeedError] = useState(null);
+      const [fileToSeed, setFileToSeed] = useState(null);
+
+      const [clients, setClients] = useState([]);
+      const [allClients, setAllClients] = useState(new Map());
+      const [selectedOrg, setSelectedOrg] = useState("All");
+      const [selectedClientId, setSelectedClientId] = useState(null);
+      // Trips and Budgets are now derived from allClients, so no separate state needed
+      const [isLoadingClients, setIsLoadingClients] = useState(true);
+      const [isLoadingDetails, setIsLoadingDetails] = useState(false); // We can remove this
+      const [searchTerm, setSearchTerm] = useState("");
+      const [showNotesModal, setShowNotesModal] = useState(false);
+      const [showResetModal, setShowResetModal] = useState(false);
+      const [isResetting, setIsResetting] = useState(false);
+
+      // State for adding trips
+      const [newTripDate, setNewTripDate] = useState("");
+      const [newTripAmount, setNewTripAmount] = useState("");
+      const [isAddingTrip, setIsAddingTrip] = useState(false);
+      const [addTripError, setAddTripError] = useState(null);
+
+      // State for editing trips
+      const [editingTripId, setEditingTripId] = useState(null);
+      const [editTripDate, setEditTripDate] = useState("");
+      const [editTripAmount, setEditTripAmount] = useState("");
+      const [isUpdatingTrip, setIsUpdatingTrip] = useState(false);
+      const [updateTripError, setUpdateTripError] = useState(null);
+      
+      const [showEditClientModal, setShowEditClientModal] = useState(false);
+      const [editingClientName, setEditingClientName] = useState("");
+      const [editingBudgetEndDate, setEditingBudgetEndDate] = useState("");
+      const [isUpdatingClient, setIsUpdatingClient] = useState(false);
+      const [updateClientError, setUpdateClientError] = useState(null);
+
+      const [newBudgetMonth, setNewBudgetMonth] = useState("");
+      const [newBudgetAmount, setNewBudgetAmount] = useState("");
+      const [isAddingBudget, setIsAddingBudget] = useState(false);
+      const [addBudgetError, setAddBudgetError] = useState(null);
+
+      const ORGS = [
+        "All",
+        "RCO (ACCT 542)",
+        "LANE_COUNTY (ACCT 671)",
+        "FULL_ACCESS (ACCT 202)"
+      ];
+      
+      useEffect(() => {
+        // Initialize Lucide icons after render
+        const timer = setTimeout(() => {
+          if (window.lucide) {
+            lucide.createIcons();
+          }
+        }, 0);
+        return () => clearTimeout(timer);
+      });
+
+      // --- NEW: Function to filter local clients ---
+      const filterAndSetClients = (allClientsMap) => {
+        const filteredClients = Array.from(allClientsMap.values()).filter(client => {
+          const inOrg = selectedOrg === "All" || client.organization === selectedOrg;
+          const inSearch = searchTerm === "" || client.name.toLowerCase().includes(searchTerm.toLowerCase());
+          return inOrg && inSearch;
+        });
+        filteredClients.sort((a, b) => a.name.localeCompare(b.name));
+        setClients(filteredClients);
+      };
+      
+      // --- REWRITTEN: Supabase data fetch and real-time subscription ---
+      useEffect(() => {
+        if (!supabase) return;
+
+        // 1. Check if seeded
+        const checkIfSeeded = async () => {
+          const { data, error } = await supabase.from('clients').select('id').limit(1);
+          if (error) {
+            console.error("Error checking if seeded:", error);
+          } else if (data && data.length > 0) {
+            setIsSeeded(true);
+          }
+        };
+        checkIfSeeded();
+
+        // 2. Initial Data Fetch
+        const fetchClients = async () => {
+          setIsLoadingClients(true);
+          const { data, error } = await supabase.from('clients').select('*');
+          
+          if (error) {
+            console.error("Error fetching clients:", error);
+          } else {
+            const newAllClients = new Map();
+            data.forEach(client => {
+              newAllClients.set(client.id, client);
+            });
+            setAllClients(newAllClients);
+            // Manually trigger the first filter
+            filterAndSetClients(newAllClients);
+          }
+          setIsLoadingClients(false);
+        };
+        
+        if (isSeeded) {
+          fetchClients();
+        }
+
+        // 3. Real-time Subscription
+        const clientChannel = supabase.channel('public:clients')
+          .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'clients' }, 
+            (payload) => {
+              console.log('Change received!', payload);
+              
+              setAllClients(currentAllClients => {
+                const newAllClients = new Map(currentAllClients);
+                if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+                  newAllClients.set(payload.new.id, payload.new);
+                } else if (payload.eventType === 'DELETE') {
+                  newAllClients.delete(payload.old.id);
+                }
+                
+                // Re-run local filters with new data
+                filterAndSetClients(newAllClients);
+                return newAllClients; // Return new map for state
+              });
+            }
+          )
+          .subscribe();
+
+        // 4. Cleanup
+        return () => {
+          supabase.removeChannel(clientChannel);
+        };
+      }, [isSeeded, supabase]); // Only depends on isSeeded and supabase
+
+      // --- NEW: This effect just filters locally ---
+      useEffect(() => {
+        if (!isLoadingClients) {
+          filterAndSetClients(allClients);
+        }
+      }, [selectedOrg, searchTerm, allClients, isLoadingClients]);
+
+
+      // --- REMOVED: useEffect for trips/budgets is no longer needed ---
+
+      const selectedClient = useMemo(() => {
+        if (!selectedClientId) return null;
+        return allClients.get(selectedClientId);
+      }, [selectedClientId, allClients]);
+      
+      // --- UPDATED: Trips, Budgets, and calculations are now derived from selectedClient ---
+      const { currentMonthBudget, currentBalance, currentMonthSpending, notes, trips, sortedBudgets } = useMemo(() => {
+        if (!selectedClient) {
+          return {
+            currentMonthBudget: 0,
+            currentBalance: 0,
+            currentMonthSpending: 0,
+            notes: [],
+            trips: [],
+            sortedBudgets: []
+          };
+        }
+
+        const now = new Date();
+        const monthYearKey = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        const budgetEndDate = selectedClient.budgetEndDate;
+        const notes = selectedClient.specialNotes || [];
+        const trips = (selectedClient.trips || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        const budgets = selectedClient.monthlyBudgets || {};
+
+        const budgetData = budgets[monthYearKey];
+        let currentMonthBudget = budgetData ? budgetData : 0; // 'limit' is no longer needed
+        
+        if (budgetEndDate && monthYearKey > budgetEndDate) {
+          currentMonthBudget = 0;
+        }
+
+        const currentMonthSpending = trips
+          .filter((trip) => trip.date.startsWith(monthYearKey))
+          .reduce((sum, trip) => sum + trip.amount, 0);
+
+        const currentBalance = currentMonthBudget - currentMonthSpending;
+
+        const sortedBudgets = Object.entries(budgets)
+          .map(([id, limit]) => ({ id, limit }))
+          .sort((a, b) => b.id.localeCompare(a.id));
+
+        return { currentMonthBudget, currentBalance, currentMonthSpending, notes, trips, sortedBudgets };
+      }, [selectedClient]);
+
+
+      const handleFileChange = (e) => {
+        setFileToSeed(e.target.files[0]);
+        setSeedError(null);
+      };
+
+      // --- REWRITTEN: Seeding logic for Supabase JSONB ---
+      const handleSeedData = async () => {
+        if (!fileToSeed || !supabase) {
+          setSeedError("Supabase client not ready.");
+          return;
+        }
+
+        if (filesSeeded.includes(fileToSeed.name)) {
+          setSeedError(`File "${fileToSeed.name}" has already been seeded.`);
+          return;
+        }
+
+        setIsSeeding(true);
+        setSeedError(null);
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const clientsObject = JSON.parse(event.target.result);
+            const orgName = getOrgFromFile(fileToSeed.name);
+            const clientsToProcess = Object.values(clientsObject);
+            
+            const clientsToInsert = [];
+
+            clientsToProcess.forEach((client) => {
+              const clientName = client.clientName;
+              if (!clientName) {
+                console.warn("Skipping client with missing name:", client);
+                setSeedError("Skipped at least one client with a missing name.");
+                return;
+              }
+              
+              const allTrips = [];
+              const allBudgets = {};
+              
+              if (client.monthlyData && Array.isArray(client.monthlyData)) {
+                client.monthlyData.forEach((monthData) => {
+                  const monthYear = convertMonthFormat(monthData.month);
+                  
+                  if (monthData.monthlyLimit != null) {
+                    allBudgets[monthYear] = monthData.monthlyLimit; // Direct key-value
+                  }
+                  
+                  if (monthData.trips && Array.isArray(monthData.trips)) {
+                    monthData.trips.forEach((trip) => {
+                      if (trip.date && trip.date !== "Remaining" && trip.amount != null) {
+                        // Add a UUID for each trip
+                        allTrips.push({ ...trip, id: crypto.randomUUID() });
+                      }
+                    });
+                  }
+                });
+              }
+
+              // Create the single client object to insert
+              const clientData = {
+                // id will be generated by Postgres
+                name: clientName,
+                organization: orgName,
+                sourceFile: fileToSeed.name,
+                specialNotes: [], // Default value
+                budgetEndDate: null,
+                trips: allTrips, // Embed array
+                monthlyBudgets: allBudgets // Embed object
+              };
+              clientsToInsert.push(clientData);
+            });
+            
+            // Insert all clients in one go
+            const { error } = await supabase.from('clients').insert(clientsToInsert);
+
+            if (error) {
+              throw error;
+            }
+            
+            setFilesSeeded(prev => [...prev, fileToSeed.name]);
+            setFileToSeed(null);
+            
+            // Realtime listener will handle the update
+
+          } catch (error) {
+            console.error("Error parsing or seeding data:", error);
+            setSeedError(`Error processing file: ${error.message}`);
+          } finally {
+            setIsSeeding(false);
+          }
+        };
+        reader.readAsText(fileToSeed);
+      };
+      
+      const handleGoToDashboard = () => {
+        if (filesSeeded.length > 0) {
+          setIsSeeded(true);
+        } else {
+          setSeedError("Please seed at least one data file before proceeding.");
+        }
+      }
+
+      // --- REWRITTEN: Reset database ---
+      const handleResetDatabase = async () => {
+        if (!supabase) return;
+        if (!window.confirm("Are you sure? This will delete ALL client data.")) {
+           return;
+        }
+        
+        setIsResetting(true);
+        setSeedError(null);
+        try {
+          // A simple delete query. `neq` is "not equal to" a dummy UUID to delete all.
+          const { error } = await supabase.from('clients').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          
+          if (error) throw error;
+          
+          setIsSeeded(false); // Go back to seed screen
+          setAllClients(new Map());
+          setClients([]);
+          setSelectedClientId(null);
+          setFilesSeeded([]);
+          setShowResetModal(false);
+        } catch (error) {
+          console.error("Error resetting database:", error);
+          setSeedError(`Error resetting: ${error.message}`);
+        } finally {
+          setIsResetting(false);
+        }
+      };
+
+      // --- REWRITTEN: Add Trip ---
+      const handleAddTrip = async (e) => {
+        e.preventDefault();
+        if (!selectedClient) return;
+
+        const amount = parseFloat(newTripAmount);
+        if (isNaN(amount) || amount <= 0 || !newTripDate) {
+          setAddTripError("Please enter a valid date and positive amount.");
+          return;
+        }
+
+        setIsAddingTrip(true);
+        setAddTripError(null);
+
+        const newTrip = {
+          id: crypto.randomUUID(), // Generate ID on client
+          date: newTripDate,
+          amount: amount
+        };
+
+        const updatedTrips = [...(selectedClient.trips || []), newTrip];
 
         try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+          const { error } = await supabase
+            .from('clients')
+            .update({ trips: updatedTrips }) // Overwrite the trips array
+            .eq('id', selectedClientId);
+
+          if (error) throw error;
+
+          setNewTripDate("");
+          setNewTripAmount("");
+        
+        } catch (error) {
+          console.error("Error adding trip:", error);
+          setAddTripError(`Failed to add trip: ${error.message}`);
+        } finally {
+          setIsAddingTrip(false);
         }
-      });
-    </script>
-  </body>
+      };
+
+      const handleStartEdit = (trip) => {
+        setEditingTripId(trip.id);
+        setEditTripDate(trip.date);
+        setEditTripAmount(trip.amount);
+        setUpdateTripError(null);
+      };
+
+      const handleCancelEdit = () => {
+        setEditingTripId(null);
+        setEditTripDate("");
+        setEditTripAmount("");
+        setUpdateTripError(null);
+      };
+
+      // --- REWRITTEN: Update Trip ---
+      const handleUpdateTrip = async (e) => {
+        e.preventDefault();
+        if (!selectedClient || !editingTripId) return;
+        
+        const amount = parseFloat(editTripAmount);
+        if (isNaN(amount) || amount <= 0 || !editTripDate) {
+          setUpdateTripError("Please enter a valid date and positive amount.");
+          return;
+        }
+
+        setIsUpdatingTrip(true);
+        setUpdateTripError(null);
+
+        const updatedTrips = (selectedClient.trips || []).map(trip => 
+          trip.id === editingTripId
+            ? { ...trip, date: editTripDate, amount: amount } // Update the matching trip
+            : trip
+        );
+
+        try {
+          const { error } = await supabase
+            .from('clients')
+            .update({ trips: updatedTrips })
+            .eq('id', selectedClientId);
+            
+          if (error) throw error;
+          
+          handleCancelEdit();
+        } catch (error) {
+          console.error("Error updating trip:", error);
+          setUpdateTripError(`Failed to update trip: ${error.message}`);
+        } finally {
+          setIsUpdatingTrip(false);
+        }
+      };
+
+      // --- REWRITTEN: Delete Trip ---
+      const handleDeleteTrip = async (tripId) => {
+        if (!selectedClient) return;
+        if (!window.confirm("Are you sure you want to delete this trip?")) {
+          return;
+        }
+        
+        const updatedTrips = (selectedClient.trips || []).filter(trip => trip.id !== tripId);
+
+        try {
+          const { error } = await supabase
+            .from('clients')
+            .update({ trips: updatedTrips })
+            .eq('id', selectedClientId);
+            
+          if (error) throw error;
+        } catch (error)
+        {
+          console.error("Error deleting trip:", error);
+          alert(`Failed to delete trip: ${error.message}`);
+        }
+      };
+      
+      // --- REWRITTEN: Set Budget ---
+      const handleSetBudget = async (e) => {
+        e.preventDefault();
+        if (!selectedClient || !newBudgetMonth) return;
+
+        const amount = parseFloat(newBudgetAmount);
+        if (isNaN(amount) || amount < 0) {
+          setAddBudgetError("Please enter a valid, non-negative amount.");
+          return;
+        }
+
+        setIsAddingBudget(true);
+        setAddBudgetError(null);
+
+        const updatedBudgets = {
+          ...(selectedClient.monthlyBudgets || {}),
+          [newBudgetMonth]: amount // Add or overwrite the key
+        };
+
+        try {
+          const { error } = await supabase
+            .from('clients')
+            .update({ monthlyBudgets: updatedBudgets })
+            .eq('id', selectedClientId);
+
+          if (error) throw error;
+
+          setNewBudgetMonth("");
+          setNewBudgetAmount("");
+        
+        } catch (error) {
+          console.error("Error setting budget:", error);
+          setAddBudgetError(`Failed to set budget: ${error.message}`);
+        } finally {
+          setIsAddingBudget(false);
+        }
+      };
+      
+      // --- REWRITTEN: Delete Budget ---
+      const handleDeleteBudget = async (monthYearKey) => {
+        if (!selectedClient) return;
+        if (!window.confirm(`Are you sure you want to delete the budget for ${monthYearKey}?`)) {
+          return;
+        }
+        
+        const updatedBudgets = { ...(selectedClient.monthlyBudgets || {}) };
+        delete updatedBudgets[monthYearKey]; // Remove the key
+
+        try {
+          const { error } = await supabase
+            .from('clients')
+            .update({ monthlyBudgets: updatedBudgets })
+            .eq('id', selectedClientId);
+            
+          if (error) throw error;
+        } catch (error) {
+          console.error("Error deleting budget:", error);
+          alert(`Failed to delete budget: ${error.message}`);
+        }
+      };
+      
+      const handleOpenEditClient = () => {
+        if (!selectedClient) return;
+        setEditingClientName(selectedClient.name);
+        setEditingBudgetEndDate(selectedClient.budgetEndDate || "");
+        setUpdateClientError(null);
+        setShowEditClientModal(true);
+      };
+      
+      const handleCloseEditClient = () => {
+        setShowEditClientModal(false);
+        setIsUpdatingClient(false);
+        setEditingClientName("");
+        setEditingBudgetEndDate("");
+        setUpdateClientError(null);
+      };
+      
+      // --- UPDATED: Update Client (simpler) ---
+      const handleUpdateClient = async (e) => {
+        e.preventDefault();
+        if (!editingClientName) {
+          setUpdateClientError("Client name cannot be empty.");
+          return;
+        }
+        
+        setIsUpdatingClient(true);
+        setUpdateClientError(null);
+        
+        try {
+          const { error } = await supabase
+            .from('clients')
+            .update({
+              name: editingClientName,
+              budgetEndDate: editingBudgetEndDate || null
+            })
+            .eq('id', selectedClientId);
+            
+          if (error) throw error;
+          
+          handleCloseEditClient();
+        } catch (error) {
+          console.error("Error updating client:", error);
+          setUpdateClientError(`Failed to update client: ${error.message}`);
+        } finally {
+          setIsUpdatingClient(false);
+        }
+      };
+
+      const renderSeed = () => (
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+          <div className="w-full max-w-lg p-8 m-4 bg-white rounded-xl shadow-2xl">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+              Database Setup
+            </h2>
+            <p className="text-center text-gray-600 mb-6">
+              Upload your JSON data files one by one to seed the shared database.
+            </p>
+
+            {seedError && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
+                <p>{seedError}</p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                  className="flex-grow w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                  disabled={isSeeding}
+                />
+                <button
+                  onClick={handleSeedData}
+                  disabled={!fileToSeed || isSeeding}
+                  className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  {isSeeding ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Upload /> <span className="ml-2">Seed File</span></>}
+                </button>
+              </div>
+
+              {filesSeeded.length > 0 && (
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-semibold text-gray-700 mb-2">Seeded Files:</h3>
+                  <ul className="space-y-2">
+                    {filesSeeded.map((fileName, index) => (
+                      <li key={index} className="flex items-center text-sm text-green-700 bg-green-50 p-2 rounded-md">
+                        <FileCheck />
+                        <span className="ml-2">{fileName}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 pt-4 border-t">
+              <button
+                onClick={handleGoToDashboard}
+                disabled={filesSeeded.length === 0 || isSeeding}
+                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-bold shadow-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+
+      const renderDashboard = () => (
+        <>
+        <div className="flex h-screen bg-gray-100">
+          <aside className="flex flex-col w-full max-w-md border-r border-gray-200 bg-white">
+            <div className="p-4 border-b border-gray-200">
+              <h1 className="text-2xl font-bold text-gray-800">Client Dashboard</h1>
+              <p className="text-sm text-gray-500" title={user.email}>Logged in as: {user.email}</p>
+            </div>
+
+            <div className="p-4 border-b border-gray-200 space-y-3">
+              {isEditor && (
+                <button 
+                  onClick={() => setShowResetModal(true)}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg font-semibold shadow-md hover:bg-red-700 disabled:opacity-50 transition-all duration-200"
+                >
+                  <DatabaseZap className="w-5 h-5" />
+                  <span className="ml-2">Reset & Re-seed Database</span>
+                </button>
+              )}
+              
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold shadow-md hover:bg-gray-700"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="ml-2">Logout</span>
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3 border-b border-gray-200 bg-gray-50">
+              <div>
+                <label htmlFor="org-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Organization
+                </label>
+                <select
+                  id="org-filter"
+                  value={selectedOrg}
+                  onChange={(e) => {
+                    setSelectedOrg(e.target.value);
+                    setSelectedClientId(null);
+                  }}
+                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {ORGS.map(org => (
+                    <option key={org} value={org}>{org}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="client-search" className="block text-sm font-medium text-gray-700 mb-1">
+                  Search Client
+                </label>
+                <input
+                  id="client-search"
+                  type="text"
+                  placeholder="Type to search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {isLoadingClients ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                </div>
+              ) : (
+                <ul>
+                  {clients.map((client) => (
+                    <li key={client.id}>
+                      <button
+                        onClick={() => setSelectedClientId(client.id)}
+                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-blue-50 focus:outline-none focus:bg-blue-100 transition-colors ${
+                          selectedClientId === client.id
+                            ? 'bg-blue-100 border-l-4 border-blue-500'
+                            : 'bg-white'
+                        }`}
+                      >
+                        <h3 className="font-semibold text-gray-900">{client.name}</h3>
+                        <p className="text-sm text-gray-500">{client.organization}</p>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </aside>
+
+          <main className="flex-1 flex flex-col overflow-hidden">
+            {selectedClientId && selectedClient ? (
+              <>
+                <div className="p-6 border-b border-gray-200 bg-white shadow-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-3xl font-bold text-gray-900">
+                      {selectedClient.name}
+                    </h2>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => setShowNotesModal(true)}
+                        className="flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors"
+                      >
+                        <Info className="w-5 h-5" />
+                        <span className="ml-2">View Notes</span>
+                      </button>
+                      {isEditor && (
+                        <button 
+                          onClick={handleOpenEditClient}
+                          className="flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors"
+                        >
+                          <Pencil className="w-5 h-5" />
+                          <span className="ml-2">Edit Client</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-lg text-gray-600">
+                    {selectedClient.organization}
+                  </p>
+                  
+                  {selectedClient.budgetEndDate && (
+                    <div className="mt-4 flex items-center p-3 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <p className="text-red-800 ml-3 text-sm font-medium">
+                        Budget End Date: This client's budget ends after {selectedClient.budgetEndDate}.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <StatCard
+                      title="Monthly Budget"
+                      value={currentMonthBudget}
+                      icon={<SlidersHorizontal className="text-blue-500" />}
+                      isCurrency={true}
+                    />
+                    <StatCard
+                      title="Month-to-Date Spending"
+                      value={currentMonthSpending}
+                      icon={<TrendingUp className="text-red-500" />}
+                      isCurrency={true}
+                    />
+                    <StatCard
+                      title="Current Balance"
+                      value={currentBalance}
+                      icon={currentBalance >= 0 ? <TrendingUp className="text-green-500" /> : <TrendingDown className="text-red-500" />}
+                      isCurrency={true}
+                      isWarning={currentBalance < 0}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6">
+                  
+                  {isEditor && (
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                      <h3 className="text-lg font-semibold text-gray-800 p-4 border-b border-gray-200">
+                        Add New Trip
+                      </h3>
+                      <form onSubmit={handleAddTrip} className="p-4 space-y-4">
+                        {addTripError && (
+                          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md text-sm" role="alert">
+                            <p>{addTripError}</p>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="md:col-span-1">
+                            <label htmlFor="trip-date" className="block text-sm font-medium text-gray-700 mb-1">
+                              Trip Date
+                            </label>
+                            <input
+                              type="date"
+                              id="trip-date"
+                              value={newTripDate}
+                              onChange={(e) => setNewTripDate(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              disabled={isAddingTrip}
+                            />
+                          </div>
+                          <div className="md:col-span-1">
+                            <label htmlFor="trip-amount" className="block text-sm font-medium text-gray-700 mb-1">
+                              Fare Amount ($)
+                            </label>
+                            <input
+                              type="number"
+                              id="trip-amount"
+                              placeholder="e.g., 12.50"
+                              step="0.01"
+                              min="0"
+                              value={newTripAmount}
+                              onChange={(e) => setNewTripAmount(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              disabled={isAddingTrip}
+                            />
+                          </div>
+                          <div className="md:col-span-1 flex items-end">
+                            <button
+                              type="submit"
+                              disabled={isAddingTrip || !newTripDate || !newTripAmount}
+                              className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            >
+                              {isAddingTrip ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                              ) : (
+                                <>
+                                  <Plus className="w-5 h-5" />
+                                  <span className="ml-2">Add Trip</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+                  
+                  {isEditor && (
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                      <h3 className="text-lg font-semibold text-gray-800 p-4 border-b border-gray-200">
+                        Manage Monthly Budgets
+                      </h3>
+                      <form onSubmit={handleSetBudget} className="p-4 space-y-4 border-b border-gray-200">
+                        {addBudgetError && (
+                          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md text-sm" role="alert">
+                            <p>{addBudgetError}</p>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="md:col-span-1">
+                            <label htmlFor="budget-month" className="block text-sm font-medium text-gray-700 mb-1">
+                              Month
+                            </label>
+                            <input
+                              type="month"
+                              id="budget-month"
+                              value={newBudgetMonth}
+                              onChange={(e) => setNewBudgetMonth(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              disabled={isAddingBudget}
+                            />
+                          </div>
+                          <div className="md:col-span-1">
+                            <label htmlFor="budget-amount" className="block text-sm font-medium text-gray-700 mb-1">
+                              Budget Amount ($)
+                            </label>
+                            <input
+                              type="number"
+                              id="budget-amount"
+                              placeholder="e.g., 200.00"
+                              step="0.01"
+                              min="0"
+                              value={newBudgetAmount}
+                              onChange={(e) => setNewBudgetAmount(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              disabled={isAddingBudget}
+                            />
+                          </div>
+                          <div className="md:col-span-1 flex items-end">
+                            <button
+                              type="submit"
+                              disabled={isAddingBudget || !newBudgetMonth || !newBudgetAmount}
+                              className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            >
+                              {isAddingBudget ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                              ) : (
+                                <>
+                                  <Calendar className="w-5 h-5" />
+                                  <span className="ml-2">Set/Update Budget</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                      
+                      <div className="p-4">
+                        <h4 className="text-md font-semibold text-gray-700 mb-2">Existing Budgets</h4>
+                        {sortedBudgets.length > 0 ? (
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Limit</th>
+                                {isEditor && <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>}
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {sortedBudgets.map((budget) => (
+                                <tr key={budget.id}>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 font-medium">{budget.id}</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{formatCurrency(budget.limit)}</td>
+                                  {isEditor && (
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
+                                      <button
+                                        onClick={() => handleDeleteBudget(budget.id)}
+                                        className="text-red-600 hover:text-red-800 p-1"
+                                        title="Delete budget"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </td>
+                                  )}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <p className="text-gray-500 text-sm">No monthly budgets set.</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    Trip History
+                  </h3>
+                  {isLoadingClients ? ( // Changed from isLoadingDetails
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                    </div>
+                  ) : trips.length > 0 ? (
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Amount
+                            </th>
+                            {isEditor && (
+                              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {trips.map((trip) => (
+                            <tr key={trip.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                {formatDate(trip.date)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                {formatCurrency(trip.amount)}
+                              </td>
+                              {isEditor && (
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-right space-x-2">
+                                  <button
+                                    onClick={() => handleStartEdit(trip)}
+                                    className="text-blue-600 hover:text-blue-800 p-1"
+                                    title="Edit trip"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteTrip(trip.id)}
+                                    className="text-red-600 hover:text-red-800 p-1"
+                                    title="Delete trip"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No trips recorded for this client.</p>
+                  )}
+                </div>
+
+                {showNotesModal && (
+                  <NotesModal 
+                    notes={notes} 
+                    clientName={selectedClient.name}
+                    onClose={() => setShowNotesModal(false)}
+                  />
+                )}
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <Users className="w-24 h-24 text-gray-300 mx-auto" />
+                  <h2 className="mt-4 text-2xl font-semibold text-gray-700">
+                    Select a client
+                  </h2>
+                  <p className="mt-1 text-gray-500">
+                    Choose a client from the list on the left to view their details.
+                  </p>
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
+
+        {/* Modals rendered outside main layout */}
+        {showResetModal && isEditor && (
+          <ResetModal
+            onClose={() => setShowResetModal(false)}
+            onConfirm={handleResetDatabase}
+            isResetting={isResetting}
+          />
+        )}
+
+        {showNotesModal && selectedClient && (
+          <NotesModal 
+            notes={notes} 
+            clientName={selectedClient.name}
+            onClose={() => setShowNotesModal(false)}
+          />
+        )}
+        
+        {editingTripId && isEditor && (
+          <EditTripModal
+            onClose={handleCancelEdit}
+            onConfirm={handleUpdateTrip}
+            tripDate={editTripDate}
+            setTripDate={setEditTripDate}
+            tripAmount={editTripAmount}
+            setTripAmount={setEditTripAmount}
+            isUpdating={isUpdatingTrip}
+            error={updateTripError}
+          />
+        )}
+        
+        {showEditClientModal && isEditor && (
+          <EditClientModal
+            onClose={handleCloseEditClient}
+            onConfirm={handleUpdateClient}
+            clientName={editingClientName}
+            setClientName={setEditingClientName}
+            budgetEndDate={editingBudgetEndDate}
+            setBudgetEndDate={setEditingBudgetEndDate}
+            isUpdating={isUpdatingClient}
+            error={updateClientError}
+          />
+        )}
+        </>
+      );
+
+      return isSeeded ? renderDashboard() : renderSeed();
+    }
+
+    // --- All Modal and Helper Components (No Changes) ---
+
+    const StatCard = ({ title, value, icon, isCurrency, isWarning }) => (
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex items-center">
+          <div className="p-3 bg-gray-100 rounded-full mr-4">
+            {icon}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">{title}</p>
+            <p className={`text-2xl font-bold ${isWarning ? 'text-red-600' : 'text-gray-900'}`}>
+              {isCurrency ? formatCurrency(value) : value}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+
+    const NotesModal = ({ notes, clientName, onClose }) => (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-lg shadow-2xl max-w-lg w-full p-6 z-50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-gray-800">
+              Notes for {clientName}
+            </h3>
+            <button 
+              onClick={onClose} 
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          {notes && notes.length > 0 ? (
+            <ul className="space-y-3">
+              {notes.map((note, index) => (
+                <li 
+                  key={index} 
+                  className="flex items-start p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg"
+                >
+                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                  <p className="text-yellow-800 ml-3">{note}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">No special notes recorded for this client.</p>
+          )}
+        </div>
+      </div>
+    );
+
+    const ResetModal = ({ onClose, onConfirm, isResetting }) => (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 z-50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-red-700">
+              Reset Database?
+            </h3>
+            <button 
+              onClick={onClose} 
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Are you sure? This will delete all SHARED client data from the database.
+            This is required if you need to re-upload your JSON files.
+            This action cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={onClose}
+              disabled={isResetting}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isResetting}
+              className="flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg font-semibold shadow-md hover:bg-red-700 disabled:opacity-50"
+            >
+              {isResetting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <DatabaseZap className="w-5 h-5" />
+                  <span className="ml-2">Yes, Reset</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+    const EditTripModal = ({ onClose, onConfirm, tripDate, setTripDate, tripAmount, setTripAmount, isUpdating, error }) => (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 z-50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-gray-800">
+              Edit Trip
+            </h3>
+            <button 
+              onClick={onClose} 
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <form onSubmit={onConfirm} className="space-y-4">
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md text-sm" role="alert">
+                <p>{error}</p>
+              </div>
+            )}
+            <div>
+              <label htmlFor="edit-trip-date" className="block text-sm font-medium text-gray-700 mb-1">
+                Trip Date
+              </label>
+              <input
+                type="date"
+                id="edit-trip-date"
+                value={tripDate}
+                onChange={(e) => setTripDate(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                disabled={isUpdating}
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-trip-amount" className="block text-sm font-medium text-gray-700 mb-1">
+                Fare Amount ($)
+              </label>
+              <input
+                type="number"
+                id="edit-trip-amount"
+                placeholder="e.g., 12.50"
+                step="0.01"
+                min="0"
+                value={tripAmount}
+                onChange={(e) => setTripAmount(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                disabled={isUpdating}
+              />
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isUpdating}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating || !tripDate || !tripAmount}
+                className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isUpdating ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <span className="ml-2">Update Trip</span>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+    
+    const EditClientModal = ({ onClose, onConfirm, clientName, setClientName, budgetEndDate, setBudgetEndDate, isUpdating, error }) => (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 z-50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-gray-800">
+              Edit Client
+            </h3>
+            <button 
+              onClick={onClose} 
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <form onSubmit={onConfirm} className="space-y-4">
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md text-sm" role="alert">
+                <p>{error}</p>
+              </div>
+            )}
+            <div>
+              <label htmlFor="edit-client-name" className="block text-sm font-medium text-gray-700 mb-1">
+                Client Name
+              </label>
+              <input
+                type="text"
+                id="edit-client-name"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                disabled={isUpdating}
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-budget-end-date" className="block text-sm font-medium text-gray-700 mb-1">
+                Budget End Date (Optional)
+              </label>
+              <input
+                type="month"
+                id="edit-budget-end-date"
+                value={budgetEndDate}
+                onChange={(e) => setBudgetEndDate(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                disabled={isUpdating}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Set this to the *last month* the client should have a budget (e.g., 2025-10).
+                Any month *after* this will have a $0 budget. Clear to remove.
+              </p>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isUpdating}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating || !clientName}
+                className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isUpdating ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <span className="ml-2">Update Client</span>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+
+    // --- Helper Functions (No Changes) ---
+
+    function formatCurrency(value) {
+      if (typeof value !== 'number') return '$0.00';
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(value);
+    }
+
+    function formatDate(dateString) {
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          const parts = dateString.split('-');
+          if (parts.length === 3) {
+            const isoDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (!isNaN(isoDate.getTime())) {
+              return isoDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+            }
+          }
+          return dateString;
+        }
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      } catch (e) {
+        return dateString;
+      }
+    }
+
+    function convertMonthFormat(monthString) {
+      if (!monthString) return "unknown-month";
+      const parts = monthString.split('-');
+      if (parts.length !== 2) return monthString;
+
+      const monthNames = {
+        "January": "01", "February": "02", "March": "03", "April": "04",
+        "May": "05", "June": "06", "July": "07", "August": "08",
+        "September": "09", "October": "10", "November": "11", "December": "12"
+      };
+      
+      const month = monthNames[parts[0]];
+      const year = parts[1];
+      
+      if (!month || !year) return monthString;
+      
+      return `${year}-${month}`;
+    }
+
+    function getOrgFromFile(fileName) {
+      if (fileName.includes('671') || fileName.toLowerCase().includes('lane county')) {
+        return "LANE_COUNTY (ACCT 671)";
+      }
+      if (fileName.includes('202') || fileName.toLowerCase().includes('full access')) {
+        return "FULL_ACCESS (ACCT 202)";
+      }
+      if (fileName.includes('542') || fileName.toLowerCase().includes('rco')) {
+        return "RCO (ACCT 542)";
+      }
+      return "Unknown";
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AppContainer />);
+  </script>
+</body>
 </html>
